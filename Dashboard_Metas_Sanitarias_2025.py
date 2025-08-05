@@ -19,7 +19,7 @@ def home():
 
     st.write("Fecha de corte de datos:")
     fecha_corte=pd.read_csv("Fecha_corte_REM.csv")
-    st.write(fecha_corte)
+    st.write(fecha_corte[['REM','Fecha_corte']].rename(columns={'Fecha_corte':'Fecha Corte'}))
     # Descripción adicional
     st.write(""" comprometidos a proporcionar información precisa y actualizada para apoyar la toma de decisiones en el ámbito de la salud pública.""")
 
