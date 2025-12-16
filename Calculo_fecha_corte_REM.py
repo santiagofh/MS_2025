@@ -3,11 +3,11 @@ import os
 import pandas as pd
 from datetime import datetime
 
-path_REM_A=r"c:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\DATA\REM\REM_2025\Datos\SerieA2025.csv"
-path_REM_BM=r"c:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\DATA\REM\REM_2025\Datos\SerieBM2025.csv"
-path_REM_BS=r"c:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\DATA\REM\REM_2025\Datos\SerieBS2025.csv"
-path_REM_D=r"c:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\DATA\REM\REM_2025\Datos\SerieP2025.csv"
-path_REM_P=r"c:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\DATA\REM\REM_2025\Datos\SerieP2025.csv"
+path_REM_A=r"c:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\DATA\REM\REM_2025\SerieA2025.csv"
+path_REM_BM=r"c:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\DATA\REM\REM_2025\SerieBM2025.csv"
+path_REM_BS=r"c:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\DATA\REM\REM_2025\SerieBS2025.csv"
+path_REM_D=r"c:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\DATA\REM\REM_2025\SerieP2025.csv"
+path_REM_P=r"c:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\DATA\REM\REM_2025\SerieP2025.csv"
 
 def obtener_fecha_corte(ruta_archivo):
     timestamp = os.path.getmtime(ruta_archivo)  # Obtiene el timestamp de modificación
