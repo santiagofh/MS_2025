@@ -49,174 +49,52 @@ df_ms3b['codigo_nombre'] = df_ms3b['IdEstablecimiento'] + ' - ' + df_ms3b['nombr
 # Título del dashboard
 st.title('Meta III.B: Niños y niñas de 6 años libres de caries')
 
-st.subheader("Filtros en Cascada")
+FILTERS = {
+    "servicio_salud": "Servicio de Salud",
+    "comuna": "Comuna",
+    "Dependencia Administrativa": "Dependencia Administrativa",
+    "Nivel de Atención": "Nivel de Atención",
+    "codigo_nombre": "Establecimiento",
+}
 
-# -----------------------------------------------------
-# 1) DEFINICIÓN DE FUNCIONES PARA RESETEAR FILTROS
-# -----------------------------------------------------
-def reset_comunas_hacia_abajo():
-    """
-    Si el usuario cambia el Servicio de Salud, se resetean
-    todos los filtros inferiores (comuna, dependencia, nivel, establecimiento).
-    """
-    st.session_state["selected_comunas"] = ["Todas"]
-    st.session_state["selected_dependencias"] = ["Todas"]
-    st.session_state["selected_niveles"] = ["Todos"]
-    st.session_state["selected_establecimientos"] = ["Todos"]
+# Inicializar session_state
+for col in FILTERS:
+    if col not in st.session_state:
+        st.session_state[col] = []
 
-def reset_dependencia_hacia_abajo():
-    """
-    Si cambia la comuna, se resetean los filtros: dependencia, nivel, establecimiento.
-    """
-    st.session_state["selected_dependencias"] = ["Todas"]
-    st.session_state["selected_niveles"] = ["Todos"]
-    st.session_state["selected_establecimientos"] = ["Todos"]
+def apply_filters(df, exclude_col=None):
+    df_f = df
+    for col in FILTERS:
+        if col == exclude_col:
+            continue
+        selected = st.session_state[col]
+        if selected:
+            df_f = df_f[df_f[col].isin(selected)]
+    return df_f
 
-def reset_nivel_hacia_abajo():
-    """
-    Si cambia la dependencia, se resetean los filtros: nivel, establecimiento.
-    """
-    st.session_state["selected_niveles"] = ["Todos"]
-    st.session_state["selected_establecimientos"] = ["Todos"]
+st.header("Filtros")
 
-def reset_establecimientos():
-    """
-    Si cambia el nivel, se resetea solamente el filtro de establecimientos.
-    """
-    st.session_state["selected_establecimientos"] = ["Todos"]
+# Render filtros bidireccionales
+for col, label in FILTERS.items():
 
+    # DataFrame para calcular opciones (excluye el filtro actual)
+    df_options = apply_filters(df_ms3b, exclude_col=col)
 
-# -----------------------------------------------------
-# 2) CREACIÓN DE VALORES POR DEFECTO EN SESSION_STATE
-#    (solo la primera vez que corre la app)
-# -----------------------------------------------------
-if "selected_servicios" not in st.session_state:
-    st.session_state["selected_servicios"] = "Todos"
-if "selected_comunas" not in st.session_state:
-    st.session_state["selected_comunas"] = ["Todas"]
-if "selected_dependencias" not in st.session_state:
-    st.session_state["selected_dependencias"] = ["Todas"]
-if "selected_niveles" not in st.session_state:
-    st.session_state["selected_niveles"] = ["Todos"]
-if "selected_establecimientos" not in st.session_state:
-    st.session_state["selected_establecimientos"] = ["Todos"]
+    options = sorted(df_options[col].dropna().unique())
 
-# Guardamos también los valores anteriores para detectar cambios
-if "prev_servicios" not in st.session_state:
-    st.session_state["prev_servicios"] = "Todos"
-if "prev_comunas" not in st.session_state:
-    st.session_state["prev_comunas"] = ["Todas"]
-if "prev_dependencias" not in st.session_state:
-    st.session_state["prev_dependencias"] = ["Todas"]
-if "prev_niveles" not in st.session_state:
-    st.session_state["prev_niveles"] = ["Todos"]
+    # Limpia selecciones inválidas (estilo Power BI)
+    st.session_state[col] = [
+        v for v in st.session_state[col] if v in options
+    ]
 
+    st.multiselect(
+        label,
+        options,
+        key=col
+    )
 
-# -----------------------------------------------------
-# 3) FILTRO 1: Servicio de Salud
-# -----------------------------------------------------
-all_servicios = ["Todos"] + sorted(df_ms3b["servicio_salud"].unique())
-selected_servicios = st.selectbox(
-    "Seleccione Servicios de Salud",
-    all_servicios,
-    index=all_servicios.index(st.session_state["selected_servicios"])  # reiniciar a lo que teníamos
-)
-
-# Si el valor ha cambiado respecto al anterior => resetea todo hacia abajo
-if selected_servicios != st.session_state["prev_servicios"]:
-    reset_comunas_hacia_abajo()
-
-# Tras posibles reseteos, guardamos la selección actual
-st.session_state["selected_servicios"] = selected_servicios
-st.session_state["prev_servicios"] = selected_servicios
-
-# ---- Aplicar este primer filtro ----
-df_ms3b_filtered = (
-    df_ms3b
-    if selected_servicios == "Todos"
-    else df_ms3b[df_ms3b["servicio_salud"] == selected_servicios]
-)
-
-
-# -----------------------------------------------------
-# 4) FILTRO 2: Comuna
-# -----------------------------------------------------
-# Construimos las comunas disponibles dentro del subset ya filtrado
-all_comunas = sorted(df_ms3b_filtered["comuna"].unique())
-selected_comunas = st.multiselect(
-    "Seleccione Comunas",
-    ["Todas"] + all_comunas,
-    default=st.session_state["selected_comunas"]
-)
-
-# Si cambió la selección de comuna de forma que no coincide con la previa, reseteamos dependencias en adelante
-if selected_comunas != st.session_state["prev_comunas"]:
-    reset_dependencia_hacia_abajo()
-
-# Guardamos la selección (y la previa)
-st.session_state["selected_comunas"] = selected_comunas
-st.session_state["prev_comunas"] = selected_comunas
-
-# Aplicar el filtro de comuna
-if "Todas" not in selected_comunas:
-    df_ms3b_filtered = df_ms3b_filtered[df_ms3b_filtered["comuna"].isin(selected_comunas)]
-
-
-# -----------------------------------------------------
-# 5) FILTRO 3: Dependencia Administrativa
-# -----------------------------------------------------
-all_dependencias = sorted(df_ms3b_filtered["Dependencia Administrativa"].dropna().unique())
-selected_dependencias = st.multiselect(
-    "Seleccione Dependencia Administrativa",
-    ["Todas"] + all_dependencias,
-    default=st.session_state["selected_dependencias"]
-)
-
-# Si cambió, resetea filtro de nivel y establecimiento
-if selected_dependencias != st.session_state["prev_dependencias"]:
-    reset_nivel_hacia_abajo()
-
-st.session_state["selected_dependencias"] = selected_dependencias
-st.session_state["prev_dependencias"] = selected_dependencias
-
-if "Todas" not in selected_dependencias:
-    df_ms3b_filtered = df_ms3b_filtered[df_ms3b_filtered["Dependencia Administrativa"].isin(selected_dependencias)]
-
-
-# -----------------------------------------------------
-# 6) FILTRO 4: Nivel de Atención
-# -----------------------------------------------------
-all_niveles = sorted(df_ms3b_filtered["Nivel de Atención"].dropna().unique())
-selected_niveles = st.multiselect(
-    "Seleccione Nivel de Atención",
-    ["Todos"] + all_niveles,
-    default=st.session_state["selected_niveles"]
-)
-
-if selected_niveles != st.session_state["prev_niveles"]:
-    reset_establecimientos()
-
-st.session_state["selected_niveles"] = selected_niveles
-st.session_state["prev_niveles"] = selected_niveles
-
-if "Todos" not in selected_niveles:
-    df_ms3b_filtered = df_ms3b_filtered[df_ms3b_filtered["Nivel de Atención"].isin(selected_niveles)]
-
-
-# -----------------------------------------------------
-# 7) FILTRO 5: Establecimientos
-# -----------------------------------------------------
-all_establecimientos = sorted(df_ms3b_filtered["codigo_nombre"].dropna().unique())
-selected_establecimientos = st.multiselect(
-    "Seleccione Establecimientos",
-    ["Todos"] + all_establecimientos,
-    default=st.session_state["selected_establecimientos"]
-)
-
-st.session_state["selected_establecimientos"] = selected_establecimientos
-
-if "Todos" not in selected_establecimientos:
-    df_ms3b_filtered = df_ms3b_filtered[df_ms3b_filtered["codigo_nombre"].isin(selected_establecimientos)]
+# DataFrame final filtrado (todos los filtros aplicados)
+df_ms3b_filtered = apply_filters(df_ms3b)
 
 
 #%%
