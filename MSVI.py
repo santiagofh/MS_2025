@@ -92,7 +92,7 @@ for col, label in FILTERS.items():
     )
 
 # DataFrame final filtrado
-df_ms1_filtered = apply_filters(df_ms6)
+df_ms6_filtered = apply_filters(df_ms6)
 
 #%%
 # Mostrar datos filtrados
