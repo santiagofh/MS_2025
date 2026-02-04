@@ -7,6 +7,7 @@ import plotly.express as px
 #%%
 # Ordenar dataframe
 df_ms = pd.read_csv('MS2025_v2.csv')
+#%%
 col_est=['Código Vigente','Nombre Oficial','Nombre Dependencia Jerárquica (SEREMI / Servicio de Salud)','Nombre Comuna']
 col_rename={
     'Código Vigente':'IdEstablecimiento',
@@ -17,7 +18,17 @@ col_rename={
 df_est = pd.read_excel('Establecimientos DEIS MINSAL 28-05-2024 (1).xlsx', skiprows=1, usecols=col_est)
 df_est = df_est.rename(columns=col_rename)
 df_ms1 = df_ms.loc[df_ms.MetaSanitaria == 'MSI']
-df_ms1 = df_ms1.merge(df_est, on='IdEstablecimiento', how='left')
+path_deis = r"C:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\GIE\DEIS\Listado de establecimientos\Establecimientos DEIS MINSAL 30-01-2026.xlsx"
+df_deis = pd.read_excel(path_deis)
+
+# Renombrar columnas relevantes
+df_deis = df_deis.rename(columns={
+    'Código Vigente': 'IdEstablecimiento',
+    'Código Dependencia Jerárquica (SEREMI / Servicio de Salud)': 'IdServicio',
+    'Código Región': 'IdRegion',
+    'IdComuna': 'Código Comuna'
+})
+df_ms1 = df_ms1.merge(df_deis, on='IdEstablecimiento', how='left')
 #%%
 # Preparar los datos
 df_ms1 = df_ms1.dropna(subset=['Ano', 'Mes'])
