@@ -75,7 +75,7 @@ if leer:
 
 #%% -----------------------------------------------------------------------------------------
 # Lectura de DEIS (para cruzar datos de establecimientos: Dependencia Admin, Nivel, etc.)
-path_deis = r"C:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\GIE\DEIS\Listado de establecimientos\Establecimientos DEIS MINSAL 07-01-2025 (2).xlsx"
+path_deis = r"C:\Users\fariass\OneDrive - SUBSECRETARIA DE SALUD PUBLICA\Escritorio\GIE\DEIS\Listado de establecimientos\Establecimientos DEIS MINSAL 30-01-2026.xlsx"
 df_deis = pd.read_excel(path_deis)
 
 # Renombrar columnas relevantes
